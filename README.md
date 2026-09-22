@@ -18,3 +18,7 @@ Arquitectura en capas: `Controller` → `Service` → `Repository`, con DTOs, Ma
 ## Endpoints
 
 _(Tabla de endpoints por funcionalidad — se completará a medida que se implementen los controladores)_
+
+## Swagger 
+
+![img.png](img.png)
