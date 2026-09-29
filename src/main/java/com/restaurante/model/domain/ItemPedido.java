@@ -14,6 +14,8 @@ public class ItemPedido {
     private String nombrePlato;
     private Double precioCongelado;
     private Integer cantidad;
+    private TerminoCoccion terminoCoccion;
+    private String observaciones;
 
     public Double subtotal() {
         return precioCongelado * cantidad;

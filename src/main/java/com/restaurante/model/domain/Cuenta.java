@@ -15,7 +15,7 @@ public class Cuenta {
     private Long idMesa;
     private Double total;
     private EstadoCuenta estado;
-    private LocalDateTime fechaApertura;
+    private LocalDateTime apertura;
 
     public Double calcularTotal() {
         return total;

@@ -16,7 +16,13 @@ public record PlatoRequestDTO(
         Double precio,
 
         @NotBlank(message = "La categoria es obligatoria")
-        String categoria
+        String categoria,
+
+        @NotNull(message = "Debe indicar si es un corte de parrilla")
+        Boolean esCorte,
+
+        @NotNull(message = "Los minutos de preparacion son obligatorios")
+        Integer minutosPreparacion
 
 ) {
 }

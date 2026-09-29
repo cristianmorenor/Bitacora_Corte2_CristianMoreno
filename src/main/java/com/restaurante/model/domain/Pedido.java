@@ -16,7 +16,7 @@ public class Pedido {
     private Long idMesa;
     private List<ItemPedido> items;
     private EstadoPedido estado;
-    private LocalDateTime timestamp;
+    private LocalDateTime confirmadoEn;
 
     public Boolean puedeModificarse() {
         return estado == EstadoPedido.RECIBIDO;

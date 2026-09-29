@@ -50,7 +50,7 @@ public class PlatoServiceImpl implements PlatoService {
     @Override
     public List<Plato> obtenerDisponibles() {
         return platos.values().stream()
-                .filter(Plato::getDisponible)
+                .filter(Plato::getActivo)
                 .toList();
     }
 

@@ -5,6 +5,8 @@ public record PlatoResponseDTO(
         String nombre,
         Double precio,
         String categoria,
-        Boolean disponible
+        Boolean esCorte,
+        Integer minutosPreparacion,
+        Boolean activo
 ) {
 }
