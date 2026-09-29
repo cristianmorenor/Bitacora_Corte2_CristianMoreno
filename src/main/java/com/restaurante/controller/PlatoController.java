@@ -6,6 +6,7 @@ import com.restaurante.model.domain.Plato;
 import com.restaurante.model.dto.request.PlatoRequestDTO;
 import com.restaurante.model.dto.response.PlatoResponseDTO;
 import com.restaurante.service.PlatoService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/platos")
 @RequiredArgsConstructor
+@Tag(name = "Platos", description = "Gestión de la carta del restaurante (administración)")
 public class PlatoController {
 
     private final PlatoService platoService;
