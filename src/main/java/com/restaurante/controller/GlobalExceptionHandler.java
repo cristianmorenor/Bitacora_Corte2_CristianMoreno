@@ -7,6 +7,9 @@ import com.restaurante.exception.MesaNotFoundException;
 import com.restaurante.exception.CuentaCerradaException;
 import com.restaurante.exception.CuentaNotFoundException;
 import com.restaurante.exception.CuentaYaAbiertaException;
+import com.restaurante.exception.PedidoNoModificableException;
+import com.restaurante.exception.PedidoNotFoundException;
+import com.restaurante.exception.TerminoCoccionRequeridoException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -79,6 +82,33 @@ public class GlobalExceptionHandler {
         log.warn("Estado de negocio invalido: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body(ErrorResponseDTO.of(422, "Estado invalido", ex.getMessage(), request.getRequestURI()));
+    }
+
+    @ExceptionHandler(PedidoNotFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> handlePedidoNoEncontrado(
+            PedidoNotFoundException ex, HttpServletRequest request) {
+
+        log.warn("Pedido no encontrado: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ErrorResponseDTO.of(404, "No encontrado", ex.getMessage(), request.getRequestURI()));
+    }
+
+    @ExceptionHandler(PedidoNoModificableException.class)
+    public ResponseEntity<ErrorResponseDTO> handlePedidoNoModificable(
+            PedidoNoModificableException ex, HttpServletRequest request) {
+
+        log.warn("Estado de negocio invalido: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(ErrorResponseDTO.of(422, "Estado invalido", ex.getMessage(), request.getRequestURI()));
+    }
+
+    @ExceptionHandler(TerminoCoccionRequeridoException.class)
+    public ResponseEntity<ErrorResponseDTO> handleTerminoCoccionRequerido(
+            TerminoCoccionRequeridoException ex, HttpServletRequest request) {
+
+        log.warn("Regla de negocio violada: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(ErrorResponseDTO.of(422, "Regla de negocio", ex.getMessage(), request.getRequestURI()));
     }
 
     @ExceptionHandler(PlatoAlreadyExistsException.class)
