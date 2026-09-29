@@ -18,7 +18,11 @@ public class Cuenta {
     private LocalDateTime apertura;
 
     public Double calcularTotal() {
-        return total;
+        return total != null ? total : 0.0;
+    }
+
+    public void agregarMonto(Double monto) {
+        this.total = calcularTotal() + monto;
     }
 
     public void registrarPago() {

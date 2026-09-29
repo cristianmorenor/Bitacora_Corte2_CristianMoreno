@@ -4,6 +4,9 @@ import com.restaurante.exception.PlatoAlreadyExistsException;
 import com.restaurante.exception.PlatoNotFoundException;
 import com.restaurante.model.dto.response.ErrorResponseDTO;
 import com.restaurante.exception.MesaNotFoundException;
+import com.restaurante.exception.CuentaCerradaException;
+import com.restaurante.exception.CuentaNotFoundException;
+import com.restaurante.exception.CuentaYaAbiertaException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -48,6 +51,34 @@ public class GlobalExceptionHandler {
         log.warn("Mesa no encontrada: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ErrorResponseDTO.of(404, "No encontrado", ex.getMessage(), request.getRequestURI()));
+    }
+
+
+    @ExceptionHandler(CuentaNotFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> handleCuentaNoEncontrada(
+            CuentaNotFoundException ex, HttpServletRequest request) {
+
+        log.warn("Cuenta no encontrada: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ErrorResponseDTO.of(404, "No encontrado", ex.getMessage(), request.getRequestURI()));
+    }
+
+    @ExceptionHandler(CuentaYaAbiertaException.class)
+    public ResponseEntity<ErrorResponseDTO> handleCuentaYaAbierta(
+            CuentaYaAbiertaException ex, HttpServletRequest request) {
+
+        log.warn("Conflicto de negocio: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ErrorResponseDTO.of(409, "Conflicto", ex.getMessage(), request.getRequestURI()));
+    }
+
+    @ExceptionHandler(CuentaCerradaException.class)
+    public ResponseEntity<ErrorResponseDTO> handleCuentaCerrada(
+            CuentaCerradaException ex, HttpServletRequest request) {
+
+        log.warn("Estado de negocio invalido: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(ErrorResponseDTO.of(422, "Estado invalido", ex.getMessage(), request.getRequestURI()));
     }
 
     @ExceptionHandler(PlatoAlreadyExistsException.class)
