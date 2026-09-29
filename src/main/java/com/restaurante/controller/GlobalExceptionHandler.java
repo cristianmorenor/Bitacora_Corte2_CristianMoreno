@@ -3,6 +3,7 @@ package com.restaurante.controller;
 import com.restaurante.exception.PlatoAlreadyExistsException;
 import com.restaurante.exception.PlatoNotFoundException;
 import com.restaurante.model.dto.response.ErrorResponseDTO;
+import com.restaurante.exception.MesaNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,15 @@ public class GlobalExceptionHandler {
             PlatoNotFoundException ex, HttpServletRequest request) {
 
         log.warn("Recurso no encontrado: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ErrorResponseDTO.of(404, "No encontrado", ex.getMessage(), request.getRequestURI()));
+    }
+
+    @ExceptionHandler(MesaNotFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> handleMesaNoEncontrada(
+            MesaNotFoundException ex, HttpServletRequest request) {
+
+        log.warn("Mesa no encontrada: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ErrorResponseDTO.of(404, "No encontrado", ex.getMessage(), request.getRequestURI()));
     }

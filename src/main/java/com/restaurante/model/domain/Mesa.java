@@ -11,21 +11,17 @@ public class Mesa {
 
     private Long id;
     private Integer numero;
-    private Integer capacidad;
     private EstadoMesa estado;
-    private Boolean cuentaAbierta;
 
     public Boolean estaDisponible() {
         return estado == EstadoMesa.DISPONIBLE;
     }
 
-    public void abrirCuenta() {
-        this.cuentaAbierta = true;
+    public void ocupar() {
         this.estado = EstadoMesa.OCUPADA;
     }
 
-    public void cerrarCuenta() {
-        this.cuentaAbierta = false;
+    public void liberar() {
         this.estado = EstadoMesa.DISPONIBLE;
     }
 }
