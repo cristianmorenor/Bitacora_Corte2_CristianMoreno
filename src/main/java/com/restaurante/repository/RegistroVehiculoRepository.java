@@ -8,4 +8,6 @@ import java.util.List;
 public interface RegistroVehiculoRepository extends JpaRepository<RegistroVehiculoEntity, Long> {
 
     List<RegistroVehiculoEntity> findBySalidaIsNull();
+
+    boolean existsByPlacaIgnoreCaseAndSalidaIsNull(String placa);
 }

@@ -9,5 +9,7 @@ public interface PlatoRepository extends JpaRepository<PlatoEntity, Long> {
 
     boolean existsByNombreIgnoreCase(String nombre);
 
+    boolean existsByNombreIgnoreCaseAndIdNot(String nombre, Long id);
+
     List<PlatoEntity> findByActivoTrue();
 }

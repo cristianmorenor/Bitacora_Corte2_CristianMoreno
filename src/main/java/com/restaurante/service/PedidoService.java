@@ -1,5 +1,6 @@
 package com.restaurante.service;
 
+import com.restaurante.model.domain.EventoPedido;
 import com.restaurante.model.domain.Pedido;
 import com.restaurante.model.dto.request.ItemPedidoRequestDTO;
 
@@ -16,4 +17,6 @@ public interface PedidoService {
     Pedido agregarItem(Long idPedido, ItemPedidoRequestDTO itemDto);
 
     Pedido cambiarEstado(Long idPedido, String nuevoEstado);
+
+    List<EventoPedido> obtenerHistorial(Long idPedido);
 }

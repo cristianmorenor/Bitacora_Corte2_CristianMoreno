@@ -10,14 +10,27 @@ import com.restaurante.exception.CuentaYaAbiertaException;
 import com.restaurante.exception.PedidoNoModificableException;
 import com.restaurante.exception.PedidoNotFoundException;
 import com.restaurante.exception.TerminoCoccionRequeridoException;
+import com.restaurante.exception.CredencialesInvalidasException;
+import com.restaurante.exception.EstadoPedidoInvalidoException;
+import com.restaurante.exception.MesaAlreadyExistsException;
+import com.restaurante.exception.PagoInsuficienteException;
+import com.restaurante.exception.RegistroVehiculoNotFoundException;
+import com.restaurante.exception.ReservaNotFoundException;
+import com.restaurante.exception.SalidaYaRegistradaException;
+import com.restaurante.exception.UsuarioAlreadyExistsException;
+import com.restaurante.exception.VehiculoYaRegistradoException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.stream.Collectors;
 
@@ -118,6 +131,82 @@ public class GlobalExceptionHandler {
         log.warn("Conflicto de negocio: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ErrorResponseDTO.of(409, "Conflicto", ex.getMessage(), request.getRequestURI()));
+    }
+
+    @ExceptionHandler({ReservaNotFoundException.class, RegistroVehiculoNotFoundException.class})
+    public ResponseEntity<ErrorResponseDTO> handleRecursoNoEncontrado(
+            RuntimeException ex, HttpServletRequest request) {
+
+        log.warn("Recurso no encontrado: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ErrorResponseDTO.of(404, "No encontrado", ex.getMessage(), request.getRequestURI()));
+    }
+
+    @ExceptionHandler({MesaAlreadyExistsException.class, UsuarioAlreadyExistsException.class,
+            VehiculoYaRegistradoException.class})
+    public ResponseEntity<ErrorResponseDTO> handleDuplicado(
+            RuntimeException ex, HttpServletRequest request) {
+
+        log.warn("Conflicto de negocio: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ErrorResponseDTO.of(409, "Conflicto", ex.getMessage(), request.getRequestURI()));
+    }
+
+    @ExceptionHandler({PagoInsuficienteException.class, SalidaYaRegistradaException.class})
+    public ResponseEntity<ErrorResponseDTO> handleReglaDeNegocio(
+            RuntimeException ex, HttpServletRequest request) {
+
+        log.warn("Regla de negocio violada: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(ErrorResponseDTO.of(422, "Regla de negocio", ex.getMessage(), request.getRequestURI()));
+    }
+
+    @ExceptionHandler(EstadoPedidoInvalidoException.class)
+    public ResponseEntity<ErrorResponseDTO> handleEstadoInvalido(
+            EstadoPedidoInvalidoException ex, HttpServletRequest request) {
+
+        log.warn("Estado de pedido invalido: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponseDTO.of(400, "Datos de entrada invalidos", ex.getMessage(), request.getRequestURI()));
+    }
+
+    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class})
+    public ResponseEntity<ErrorResponseDTO> handleCuerpoInvalido(
+            Exception ex, HttpServletRequest request) {
+
+        log.warn("Peticion mal formada: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponseDTO.of(400, "Datos de entrada invalidos",
+                        "El cuerpo o los parametros de la peticion no tienen el formato esperado", request.getRequestURI()));
+    }
+
+    @ExceptionHandler(CredencialesInvalidasException.class)
+    public ResponseEntity<ErrorResponseDTO> handleCredencialesInvalidas(
+            CredencialesInvalidasException ex, HttpServletRequest request) {
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ErrorResponseDTO.of(401, "No autenticado", ex.getMessage(), request.getRequestURI()));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponseDTO> handleAccesoDenegado(
+            AccessDeniedException ex, HttpServletRequest request) {
+
+        log.warn("Acceso denegado a {}", request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ErrorResponseDTO.of(403, "Acceso denegado",
+                        "Tu rol no tiene permiso para esta operacion", request.getRequestURI()));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponseDTO> handleIntegridad(
+            DataIntegrityViolationException ex, HttpServletRequest request) {
+
+        log.warn("Violacion de integridad en BD: {}", ex.getMostSpecificCause().getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ErrorResponseDTO.of(409, "Conflicto",
+                        "La operacion viola una restriccion de la base de datos (registro duplicado o en uso)",
+                        request.getRequestURI()));
     }
 
     @ExceptionHandler(Exception.class)
