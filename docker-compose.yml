@@ -1,0 +1,58 @@
+# Levanta la API con sus dos bases de datos: docker compose up --build
+# Las credenciales se leen del archivo .env (copiar .env.example a .env y llenarlo)
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: brasaviva-postgres
+    environment:
+      POSTGRES_DB: brasaviva
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d brasaviva"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mongo:
+    image: mongo:7
+    container_name: brasaviva-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    image: brasa-viva-api
+    container_name: brasaviva-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/brasaviva
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      # Si MONGODB_URI esta vacio en .env se usa el Mongo del compose; para Atlas se pone la URI del cluster
+      MONGODB_URI: ${MONGODB_URI:-mongodb://mongo:27017/brasaviva}
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      SHOW_SQL: "false"
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres-data:
+  mongo-data:
