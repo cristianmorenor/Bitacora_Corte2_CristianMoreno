@@ -1,9 +1,11 @@
 package com.restaurante.controller;
 
+import com.restaurante.mapper.EventoPedidoMapper;
 import com.restaurante.mapper.PedidoMapper;
 import com.restaurante.model.domain.Pedido;
 import com.restaurante.model.dto.request.ItemPedidoRequestDTO;
 import com.restaurante.model.dto.request.PedidoRequestDTO;
+import com.restaurante.model.dto.response.EventoPedidoResponseDTO;
 import com.restaurante.model.dto.response.PedidoResponseDTO;
 import com.restaurante.service.PedidoService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,6 +24,7 @@ public class PedidoController {
 
     private final PedidoService pedidoService;
     private final PedidoMapper pedidoMapper;
+    private final EventoPedidoMapper eventoPedidoMapper;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -54,5 +57,12 @@ public class PedidoController {
     public PedidoResponseDTO cambiarEstado(@PathVariable Long id, @RequestParam String nuevoEstado) {
         Pedido pedido = pedidoService.cambiarEstado(id, nuevoEstado);
         return pedidoMapper.toDTO(pedido);
+    }
+
+    @GetMapping("/{id}/historial")
+    public List<EventoPedidoResponseDTO> obtenerHistorial(@PathVariable Long id) {
+        return pedidoService.obtenerHistorial(id).stream()
+                .map(eventoPedidoMapper::toDTO)
+                .toList();
     }
 }

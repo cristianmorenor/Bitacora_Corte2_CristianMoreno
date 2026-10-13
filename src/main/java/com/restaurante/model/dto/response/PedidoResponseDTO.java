@@ -8,6 +8,7 @@ public record PedidoResponseDTO(
         Long idMesa,
         List<ItemPedidoResponseDTO> items,
         String estado,
-        LocalDateTime confirmadoEn
+        LocalDateTime confirmadoEn,
+        Double total
 ) {
 }

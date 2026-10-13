@@ -6,6 +6,7 @@ import com.restaurante.model.domain.Plato;
 import com.restaurante.mapper.PlatoPersistenceMapper;
 import com.restaurante.persistence.entity.PlatoEntity;
 import com.restaurante.repository.PlatoRepository;
+import com.restaurante.validator.PlatoValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -32,6 +34,9 @@ class PlatoServiceImplTest {
 
     @Mock
     private PlatoPersistenceMapper entityMapper;
+
+    @Mock
+    private PlatoValidator platoValidator;
 
     @InjectMocks
     private PlatoServiceImpl platoService;
@@ -52,7 +57,6 @@ class PlatoServiceImplTest {
     @Test
     @DisplayName("Crear plato valido - debe asignar id y retornar el plato")
     void crear_platoValido_debeAsignarId() {
-        when(platoRepository.existsByNombreIgnoreCase("Costillas BBQ")).thenReturn(false);
         when(entityMapper.toEntity(plato)).thenReturn(entity);
         when(platoRepository.save(entity)).thenReturn(entityGuardada);
         when(entityMapper.toDomain(entityGuardada)).thenReturn(platoGuardado);
@@ -68,7 +72,8 @@ class PlatoServiceImplTest {
     @Test
     @DisplayName("Crear plato con nombre duplicado - debe lanzar excepcion")
     void crear_nombreDuplicado_debeLanzarExcepcion() {
-        when(platoRepository.existsByNombreIgnoreCase("Costillas BBQ")).thenReturn(true);
+        doThrow(new PlatoAlreadyExistsException("Ya existe un plato con nombre: Costillas BBQ"))
+                .when(platoValidator).validarNombreUnico("Costillas BBQ");
 
         assertThrows(PlatoAlreadyExistsException.class, () -> platoService.crear(plato));
 
@@ -112,5 +117,33 @@ class PlatoServiceImplTest {
         assertThrows(PlatoNotFoundException.class, () -> platoService.eliminar(999L));
 
         verify(platoRepository, never()).deleteById(any());
+    }
+
+    @Test
+    @DisplayName("Actualizar plato - debe cambiar todos sus datos")
+    void actualizar_platoExistente_debeActualizarDatos() {
+        Plato cambios = new Plato(null, "Costillas Ahumadas", 48000.0, "PLATO_FUERTE", true, 30, true);
+        when(platoRepository.findById(1L)).thenReturn(Optional.of(entityGuardada));
+        when(platoRepository.save(entityGuardada)).thenReturn(entityGuardada);
+        when(entityMapper.toDomain(entityGuardada)).thenReturn(platoGuardado);
+
+        platoService.actualizar(1L, cambios);
+
+        verify(platoValidator).validarNombreUnicoAlActualizar(1L, "Costillas Ahumadas");
+        assertEquals("Costillas Ahumadas", entityGuardada.getNombre());
+        assertEquals(48000.0, entityGuardada.getPrecio());
+        assertEquals(30, entityGuardada.getMinutosPreparacion());
+    }
+
+    @Test
+    @DisplayName("Obtener disponibles - debe consultar solo los platos activos")
+    void obtenerDisponibles_debeUsarConsultaDeActivos() {
+        when(platoRepository.findByActivoTrue()).thenReturn(List.of(entityGuardada));
+        when(entityMapper.toDomain(entityGuardada)).thenReturn(platoGuardado);
+
+        List<Plato> resultado = platoService.obtenerDisponibles();
+
+        assertEquals(1, resultado.size());
+        verify(platoRepository, never()).findAll();
     }
 }

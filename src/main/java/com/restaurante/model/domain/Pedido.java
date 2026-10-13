@@ -29,4 +29,17 @@ public class Pedido {
     public void cambiarEstado(EstadoPedido nuevoEstado) {
         this.estado = nuevoEstado;
     }
+
+    public Double calcularTotal() {
+        if (items == null) {
+            return 0.0;
+        }
+        return items.stream()
+                .mapToDouble(ItemPedido::subtotal)
+                .sum();
+    }
+
+    public Boolean estaFinalizado() {
+        return estado == EstadoPedido.ENTREGADO || estado == EstadoPedido.CANCELADO;
+    }
 }
